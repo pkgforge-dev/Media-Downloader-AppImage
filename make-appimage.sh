@@ -18,7 +18,7 @@ quick-sharun \
 	/usr/bin/wget             \
 	/usr/bin/aria2c           \
 	/usr/bin/yt-dlp           \
-	/usr/bin/deno             \
+	/usr/bin/bun              \
 	/usr/bin/ffmpeg
 
 # Additional changes can be done in between here
