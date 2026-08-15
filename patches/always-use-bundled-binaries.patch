@@ -1,0 +1,22 @@
+diff --git a/src/settings.cpp b/src/settings.cpp
+index 54463a4c..15bfb300 100644
+--- a/src/settings.cpp
++++ b/src/settings.cpp
+@@ -238,7 +238,7 @@ bool settings::useSystemSupportingEngine()
+ 
+ bool settings::useSystemEngine()
+ {
+-	return this->getOption( "UseSystemEngine",false ) ;
++	return this->getOption( "UseSystemEngine",utility::platformIsAppImage() ) ;
+ }
+ 
+ void settings::setUseSystemSupportingEngine( bool e )
+@@ -779,7 +779,7 @@ void settings::setAutoDownloadWhenAddedInBatchDownloader( bool e )
+ 
+ bool settings::showVersionInfoAndAutoDownloadUpdates()
+ {
+-	return this->getOption( "ShowVersionInfoAndAutoDownloadUpdates",true ) ;
++	return this->getOption( "ShowVersionInfoAndAutoDownloadUpdates",!utility::platformIsAppImage() ) ;
+ }
+ 
+ bool settings::showLocalAndLatestVersionInformation()

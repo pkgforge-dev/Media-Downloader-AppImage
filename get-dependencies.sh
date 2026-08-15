@@ -30,6 +30,10 @@ git clone https://github.com/bellard/quickjs ./quickjs && (
 	make -s install PREFIX=/usr
 )
 
+# media-downloader expects the bundled quickjs under this name, otherwise
+# it will download its own copy in HOME and will fail to work on musl systems
+ln -sr /usr/bin/qjs /usr/bin/qjs-linux-"$ARCH"
+
 # build yt-dlp and its dependencies since archlinuxarm is insanely out of date
 # remove deno since we have quickjs already, npm is still needed to build yt-dlp-ejs
 export PRE_BUILD_CMDS="sed -i -e 's|deno||g' -e '/^check() {/,/^}/d' ./PKGBUILD"
@@ -49,6 +53,8 @@ git clone https://github.com/mhogomchungu/media-downloader ./media-downloader &&
 	git fetch --tags origin
 	TAG=$(git tag --sort=-v:refname | grep -vi 'preview\|alpha\|beta' | head -1)
 	git checkout "$TAG"
+
+	git apply ../patches/always-use-bundled-binaries.patch
 
 	cmake -S ./ -B ./build -D CMAKE_INSTALL_PREFIX=/usr -D BUILD_WITH_QT6=ON
 	cmake --build ./build
