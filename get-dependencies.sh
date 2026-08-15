@@ -6,28 +6,54 @@ ARCH=$(uname -m)
 
 echo "Installing package dependencies..."
 echo "---------------------------------------------------------------"
-pacman -Syu --noconfirm aria2 yt-dlp bun qt6ct kvantum lxqt-qtplugin
+pacman -Syu --noconfirm \
+	aria2          \
+	cmake          \
+	kvantum        \
+	lxqt-qtplugin  \
+	qt6-base       \
+	qt6ct          \
+	npm
 
 echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
 get-debloated-pkgs --add-common --prefer-nano ffmpeg-mini
 
-# Comment this out if you need an AUR package
-make-aur-package media-downloader
+echo "Building quickjs..."
+echo "---------------------------------------------------------------"
+# build quickjs since archlinux only packages quickjs-ng
+# This has performance issues with yt-dlp
+# https://github.com/bellard/quickjs/issues/445#issuecomment-3350946013
+git clone https://github.com/bellard/quickjs ./quickjs && (
+	cd ./quickjs
+	make -s
+	make -s install PREFIX=/usr
+)
 
-# yt-dlp-ejs archlinux package has a hard dependency on deno
-# but this can actually use bun instead
-pacman -Rdd --noconfirm deno || :
+# build yt-dlp and its dependencies since archlinuxarm is insanely out of date
+# remove deno since we have quickjs already, npm is still needed to build yt-dlp-ejs
+export PRE_BUILD_CMDS="sed -i -e 's|deno||g' -e '/^check() {/,/^}/d' ./PKGBUILD"
+make-aur-package --archlinux-pkg yt-dlp-ejs
+make-aur-package --archlinux-pkg yt-dlp
+unset PRE_BUILD_CMDS
 
-# yt-dlp also gives a warning that only deno is supported by default
-sed -i -e "s|default=\['deno'\]|default=['bun']|" /usr/lib/python*/site-packages/yt_dlp/options.py 
+# yt-dlp gives a warning that only deno is supported by default
+sed -i -e "s|default=\['deno'\]|default=['quickjs']|" /usr/lib/python*/site-packages/yt_dlp/options.py
 
 # If the application needs to be manually built that has to be done down here
+echo "Building media-downloader..."
+echo "---------------------------------------------------------------"
+git clone https://github.com/mhogomchungu/media-downloader ./media-downloader && (
+	cd ./media-downloader
 
-# if you also have to make nightly releases check for DEVEL_RELEASE = 1
-#
-# if [ "${DEVEL_RELEASE-}" = 1 ]; then
-# 	nightly build steps
-# else
-# 	regular build steps
-# fi
+	git fetch --tags origin
+	TAG=$(git tag --sort=-v:refname | grep -vi 'preview\|alpha\|beta' | head -1)
+	git checkout "$TAG"
+
+	cmake -S ./ -B ./build -D CMAKE_INSTALL_PREFIX=/usr -D BUILD_WITH_QT6=ON
+	cmake --build ./build
+	cmake --install ./build
+
+	echo "$TAG" > ~/version
+)
+
