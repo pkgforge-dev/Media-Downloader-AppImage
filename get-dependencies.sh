@@ -56,7 +56,10 @@ git clone https://github.com/mhogomchungu/media-downloader ./media-downloader &&
 
 	git apply ../patches/always-use-bundled-binaries.patch
 
-	cmake -S ./ -B ./build -D CMAKE_INSTALL_PREFIX=/usr -D BUILD_WITH_QT6=ON
+	cmake -S ./ -B ./build \
+		-D CMAKE_BUILD_TYPE=Release \
+		-D CMAKE_INSTALL_PREFIX=/usr \
+		-D BUILD_WITH_QT6=ON
 	cmake --build ./build
 	cmake --install ./build
 
