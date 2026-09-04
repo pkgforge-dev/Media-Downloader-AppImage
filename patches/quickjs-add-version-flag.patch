@@ -1,0 +1,23 @@
+diff --git a/qjs.c b/qjs.c
+--- a/qjs.c
++++ b/qjs.c
+@@ -293,6 +293,7 @@ void help(void)
+     printf("QuickJS version " CONFIG_VERSION "\n"
+            "usage: " PROG_NAME " [options] [file [args]]\n"
+            "-h  --help         list options\n"
++           "-v  --version      print version string and then exit\n"
+            "-e  --eval EXPR    evaluate EXPR\n"
+            "-i  --interactive  go to interactive mode\n"
+            "-m  --module       load as ES6 module (default=autodetect)\n"
+@@ -356,6 +357,10 @@ int main(int argc, char **argv)
+             if (opt == 'h' || opt == '?' || !strcmp(longopt, "help")) {
+                 help();
+                 continue;
+             }
++            if (opt == 'v' || !strcmp(longopt, "version")) {
++                printf("%s\n", CONFIG_VERSION);
++                return 0;
++            }
+             if (opt == 'e' || !strcmp(longopt, "eval")) {
+                 if (*arg) {
+                     expr = arg;

@@ -26,6 +26,9 @@ echo "---------------------------------------------------------------"
 # https://github.com/bellard/quickjs/issues/445#issuecomment-3350946013
 git clone https://github.com/bellard/quickjs ./quickjs && (
 	cd ./quickjs
+	# this needs to be patch to support --version since media downloader
+	# will run the binary with that flag, this just fixes a cosmetic error
+	git apply ../patches/quickjs-add-version-flag.patch
 	make -s
 	make -s install PREFIX=/usr
 )
